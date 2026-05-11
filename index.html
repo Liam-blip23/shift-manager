@@ -2,23 +2,24 @@
 <html lang="vi">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
   <title>Shift Manager</title>
 
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+  <script src="[cdnjs.cloudflare.com](https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js)"></script>
+  <script src="[cdnjs.cloudflare.com](https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js)"></script>
 
   <style>
     * {
       margin: 0;
       padding: 0;
       box-sizing: border-box;
-      font-family: Arial, sans-serif;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
     }
 
     body {
-      background: #f3f4f6;
-      padding: 20px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      padding: 15px;
     }
 
     .container {
@@ -30,45 +31,79 @@
     .main-app {
       background: white;
       padding: 25px;
-      border-radius: 15px;
-      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+      border-radius: 20px;
+      box-shadow: 0 10px 40px rgba(0,0,0,0.2);
     }
 
     h1 {
       margin-bottom: 20px;
       text-align: center;
+      color: #1f2937;
+      font-size: 1.5rem;
+    }
+
+    h2 {
+      color: #374151;
+      margin-bottom: 15px;
+      font-size: 1.2rem;
     }
 
     input,
     select,
     button {
-      padding: 10px;
-      border-radius: 8px;
-      border: 1px solid #ccc;
+      padding: 12px 16px;
+      border-radius: 10px;
+      border: 1px solid #e5e7eb;
+      font-size: 14px;
+      transition: all 0.2s;
+    }
+
+    input:focus,
+    select:focus {
+      outline: none;
+      border-color: #667eea;
+      box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.2);
     }
 
     button {
       cursor: pointer;
       border: none;
-      background: #2563eb;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
       color: white;
-      font-weight: bold;
-      transition: 0.2s;
+      font-weight: 600;
+      transition: all 0.3s;
     }
 
     button:hover {
-      opacity: 0.9;
+      transform: translateY(-2px);
+      box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4);
+    }
+
+    button:active {
+      transform: translateY(0);
     }
 
     .login-box {
-      max-width: 400px;
-      margin: 100px auto;
+      max-width: 380px;
+      margin: 80px auto;
       text-align: center;
+    }
+
+    .login-box h1 {
+      font-size: 1.8rem;
+      margin-bottom: 30px;
     }
 
     .login-box input {
       width: 100%;
       margin: 15px 0;
+      padding: 15px;
+    }
+
+    .login-box button {
+      width: 100%;
+      padding: 15px;
+      font-size: 16px;
     }
 
     .toolbar {
@@ -76,81 +111,276 @@
       flex-wrap: wrap;
       gap: 10px;
       justify-content: space-between;
+      align-items: center;
       margin-bottom: 20px;
+      padding: 15px;
+      background: #f9fafb;
+      border-radius: 15px;
     }
 
     .toolbar-left,
     .toolbar-right {
       display: flex;
-      gap: 10px;
+      gap: 8px;
       flex-wrap: wrap;
+    }
+
+    .toolbar button {
+      padding: 10px 15px;
+      font-size: 13px;
+    }
+
+    .btn-nav {
+      background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+    }
+
+    .btn-add {
+      background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    }
+
+    .btn-pdf {
+      background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+    }
+
+    .btn-lang {
+      background: linear-gradient(135deg, #ec4899 0%, #be185d 100%);
+    }
+
+    .btn-delete {
+      background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+      padding: 6px 12px;
+      font-size: 12px;
+    }
+
+    .table-wrapper {
+      overflow-x: auto;
+      border-radius: 15px;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.1);
     }
 
     table {
       width: 100%;
       border-collapse: collapse;
       background: white;
-      overflow-x: auto;
     }
 
     th,
     td {
-      border: 1px solid #ddd;
-      padding: 10px;
+      border: 1px solid #e5e7eb;
+      padding: 12px 8px;
       text-align: center;
-      min-width: 120px;
+      min-width: 100px;
     }
 
     th {
-      background: #2563eb;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
       color: white;
+      font-weight: 600;
+      font-size: 13px;
+      position: sticky;
+      top: 0;
     }
 
-    td select {
-      width: 100%;
+    th:first-child {
+      min-width: 140px;
+    }
+
+    td {
+      font-size: 13px;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    td:hover {
+      background: #f3f4f6;
+    }
+
+    .employee-cell {
+      display: flex;
+      align-items: center;
+      gap: 5px;
     }
 
     .employee-select {
-      width: 100%;
+      flex: 1;
+      padding: 8px;
+      border-radius: 8px;
+      border: 1px solid #e5e7eb;
+      font-size: 13px;
+    }
+
+    .shift-cell {
+      padding: 8px;
+      border-radius: 8px;
+      background: #f0fdf4;
+      color: #166534;
+      font-weight: 500;
+    }
+
+    .shift-empty {
+      color: #9ca3af;
+      font-style: italic;
     }
 
     .history {
       margin-top: 25px;
+      padding: 20px;
+      background: #f9fafb;
+      border-radius: 15px;
+    }
+
+    .history-buttons {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
     }
 
     .history button {
-      margin: 5px;
-      background: #059669;
-    }
-
-    .add-btn {
-      position: fixed;
-      right: 30px;
-      bottom: 30px;
-      width: 60px;
-      height: 60px;
-      border-radius: 50%;
-      font-size: 30px;
-      background: #10b981;
+      background: linear-gradient(135deg, #059669 0%, #047857 100%);
+      padding: 8px 12px;
+      font-size: 12px;
     }
 
     .hidden {
       display: none;
     }
 
-    @media (max-width: 768px) {
+    /* Modal Styles */
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,0.6);
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
+      padding: 20px;
+    }
+
+    .modal-content {
+      background: white;
+      padding: 25px;
+      border-radius: 20px;
+      width: 100%;
+      max-width: 320px;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+      animation: modalIn 0.3s ease;
+    }
+
+    @keyframes modalIn {
+      from {
+        opacity: 0;
+        transform: scale(0.9) translateY(-20px);
+      }
+      to {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+      }
+    }
+
+    .modal-content h3 {
+      text-align: center;
+      margin-bottom: 20px;
+      color: #1f2937;
+    }
+
+    .modal-content label {
+      display: block;
+      margin-bottom: 5px;
+      font-weight: 600;
+      color: #374151;
+    }
+
+    .modal-content input[type="time"] {
+      width: 100%;
+      padding: 12px;
+      margin-bottom: 15px;
+      font-size: 16px;
+    }
+
+    .modal-buttons {
+      display: flex;
+      gap: 10px;
+      margin-top: 10px;
+    }
+
+    .modal-buttons button {
+      flex: 1;
+      padding: 12px;
+    }
+
+    .btn-cancel {
+      background: #6b7280;
+    }
+
+    .btn-clear {
+      background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+    }
+
+    /* iPhone specific */
+    @media (max-width: 480px) {
       body {
         padding: 10px;
       }
 
-      th,
-      td {
-        min-width: 90px;
-        font-size: 12px;
+      .main-app {
+        padding: 15px;
+      }
+
+      h1 {
+        font-size: 1.2rem;
       }
 
       .toolbar {
-        flex-direction: column;
+        padding: 10px;
+        gap: 8px;
+      }
+
+      .toolbar button {
+        padding: 8px 12px;
+        font-size: 11px;
+      }
+
+      th, td {
+        padding: 8px 4px;
+        min-width: 70px;
+        font-size: 11px;
+      }
+
+      th:first-child,
+      td:first-child {
+        min-width: 110px;
+      }
+
+      .employee-select {
+        padding: 6px;
+        font-size: 11px;
+      }
+
+      .btn-delete {
+        padding: 4px 8px;
+        font-size: 10px;
+      }
+
+      .history button {
+        padding: 6px 10px;
+        font-size: 11px;
+      }
+    }
+
+    @media (max-width: 380px) {
+      .toolbar-left,
+      .toolbar-right {
+        width: 100%;
+        justify-content: center;
+      }
+
+      th, td {
+        min-width: 60px;
+        font-size: 10px;
       }
     }
   </style>
@@ -161,166 +391,221 @@
 
   <!-- LOGIN -->
   <div class="login-box" id="loginBox">
-    <h1>Shift Manager Login</h1>
-
+    <h1>🗓️ Shift Manager</h1>
     <input type="password" id="passwordInput" placeholder="Nhập mật khẩu" />
-
     <button onclick="login()">Đăng nhập</button>
   </div>
-
 
   <!-- MAIN APP -->
   <div class="main-app hidden" id="mainApp">
 
-    <h1>Quản Lý Lịch Làm Việc</h1>
+    <h1 id="mainTitle">📅 Quản Lý Lịch Làm Việc</h1>
 
     <div class="toolbar">
-
       <div class="toolbar-left">
-        <button onclick="prevWeek()">⬅ Tuần trước</button>
-        <button onclick="nextWeek()">Tuần sau ➡</button>
+        <button class="btn-nav" onclick="prevWeek()">⬅ <span data-lang="prevWeek">Tuần trước</span></button>
+        <button class="btn-nav" onclick="nextWeek()"><span data-lang="nextWeek">Tuần sau</span> ➡</button>
       </div>
 
       <div class="toolbar-right">
-        <button onclick="addEmployee()">+ Nhân viên</button>
-        <button onclick="downloadPDF()">⬇ PDF</button>
+        <button class="btn-lang" onclick="toggleLanguage()">🌐 <span id="langBtn">日本語</span></button>
+        <button class="btn-add" onclick="addEmployee()">+ <span data-lang="employee">Nhân viên</span></button>
+        <button class="btn-pdf" onclick="downloadPDF()">⬇ PDF</button>
       </div>
-
     </div>
 
-
-    <div id="tableContainer"></div>
-
+    <div class="table-wrapper">
+      <div id="tableContainer"></div>
+    </div>
 
     <div class="history">
-      <h2>Lịch sử 3 tháng</h2>
-      <div id="historyContainer"></div>
+      <h2 data-lang="history">📜 Lịch sử 3 tháng</h2>
+      <div class="history-buttons" id="historyContainer"></div>
     </div>
 
   </div>
 
 </div>
 
-<button class="add-btn hidden" id="addWeekBtn" onclick="createNextWeek()">+</button>
+<!-- Time Modal -->
+<div class="modal" id="timeModal">
+  <div class="modal-content">
+    <h3 data-lang="selectTime">⏰ Chọn giờ làm</h3>
+    
+    <label data-lang="timeIn">Giờ vào (IN)</label>
+    <input type="time" id="timeIn" step="1800">
+    
+    <label data-lang="timeOut">Giờ ra (OUT)</label>
+    <input type="time" id="timeOut" step="1800">
+    
+    <div class="modal-buttons">
+      <button class="btn-cancel" onclick="closeModal()" data-lang="cancel">Hủy</button>
+      <button class="btn-clear" onclick="clearShift()" data-lang="clear">Xóa</button>
+      <button onclick="saveTimeRange()" data-lang="save">Lưu</button>
+    </div>
+  </div>
+</div>
 
 <script>
 
 const PASSWORD = "tencho123";
 
-const employees = [
+let employees = JSON.parse(localStorage.getItem("employees")) || [
   "Dung",
   "Sato",
   "Yamada",
   "Nguyen"
 ];
 
-
-
 let currentWeekOffset = 0;
 let allWeeks = JSON.parse(localStorage.getItem("allWeeks")) || {};
+let selectedRow = null;
+let selectedDay = null;
+let currentLang = localStorage.getItem("lang") || "vi";
 
+// Language translations
+const translations = {
+  vi: {
+    mainTitle: "📅 Quản Lý Lịch Làm Việc",
+    prevWeek: "Tuần trước",
+    nextWeek: "Tuần sau",
+    employee: "Nhân viên",
+    history: "📜 Lịch sử 3 tháng",
+    selectTime: "⏰ Chọn giờ làm",
+    timeIn: "Giờ vào (IN)",
+    timeOut: "Giờ ra (OUT)",
+    cancel: "Hủy",
+    clear: "Xóa",
+    save: "Lưu",
+    delete: "Xóa",
+    selectHour: "Chọn giờ",
+    enterName: "Nhập tên nhân viên:",
+    confirmDelete: "Bạn có chắc muốn xóa nhân viên này?",
+    days: ["Thứ 2", "Thứ 3", "Thứ 4", "Thứ 5", "Thứ 6", "Thứ 7", "CN"],
+    langBtn: "日本語"
+  },
+  ja: {
+    mainTitle: "📅 シフト管理",
+    prevWeek: "前週",
+    nextWeek: "次週",
+    employee: "従業員",
+    history: "📜 過去3ヶ月",
+    selectTime: "⏰ 勤務時間選択",
+    timeIn: "出勤時間",
+    timeOut: "退勤時間",
+    cancel: "キャンセル",
+    clear: "クリア",
+    save: "保存",
+    delete: "削除",
+    selectHour: "時間選択",
+    enterName: "従業員名を入力:",
+    confirmDelete: "この従業員を削除しますか？",
+    days: ["月", "火", "水", "木", "金", "土", "日"],
+    langBtn: "Tiếng Việt"
+  }
+};
+
+function t(key) {
+  return translations[currentLang][key] || key;
+}
+
+function toggleLanguage() {
+  currentLang = currentLang === "vi" ? "ja" : "vi";
+  localStorage.setItem("lang", currentLang);
+  updateLanguage();
+  renderTable();
+}
+
+function updateLanguage() {
+  document.getElementById("mainTitle").textContent = t("mainTitle");
+  document.getElementById("langBtn").textContent = t("langBtn");
+  
+  document.querySelectorAll("[data-lang]").forEach(el => {
+    const key = el.getAttribute("data-lang");
+    if (translations[currentLang][key]) {
+      el.textContent = translations[currentLang][key];
+    }
+  });
+}
 
 function login() {
   const password = document.getElementById("passwordInput").value;
 
-  if(password === PASSWORD) {
+  if (password === PASSWORD) {
     document.getElementById("loginBox").classList.add("hidden");
     document.getElementById("mainApp").classList.remove("hidden");
-    document.getElementById("addWeekBtn").classList.remove("hidden");
-
+    
+    updateLanguage();
     renderTable();
     renderHistory();
-  }
-  else {
-    alert("Sai mật khẩu");
+  } else {
+    alert("Sai mật khẩu / パスワードが違います");
   }
 }
-
 
 function getMonday(date) {
   const d = new Date(date);
   const day = d.getDay();
   const diff = d.getDate() - day + (day === 0 ? -6 : 1);
-
   return new Date(d.setDate(diff));
 }
-
 
 function getWeekDates(offset = 0) {
   const today = new Date();
   const monday = getMonday(today);
-
   monday.setDate(monday.getDate() + offset * 7);
 
   let dates = [];
-
-  for(let i = 0; i < 7; i++) {
+  for (let i = 0; i < 7; i++) {
     const d = new Date(monday);
     d.setDate(monday.getDate() + i);
-
     dates.push(d);
   }
-
   return dates;
 }
 
-
 function formatDate(date) {
-  return `${date.getFullYear()}/${date.getMonth()+1}/${date.getDate()}`;
+  return `${date.getMonth() + 1}/${date.getDate()}`;
 }
-
 
 function getWeekKey(offset = 0) {
   return getWeekDates(offset)[0].toISOString().split("T")[0];
 }
 
-
 function renderTable() {
-
   const dates = getWeekDates(currentWeekOffset);
   const weekKey = getWeekKey(currentWeekOffset);
 
-  if(!allWeeks[weekKey]) {
+  if (!allWeeks[weekKey]) {
     allWeeks[weekKey] = [];
   }
 
   const data = allWeeks[weekKey];
-
-  const days = [
-    "Thứ 2",
-    "Thứ 3",
-    "Thứ 4",
-    "Thứ 5",
-    "Thứ 6",
-    "Thứ 7",
-    "Chủ nhật"
-  ];
+  const days = t("days");
 
   let html = `
     <table id="shiftTable">
       <thead>
         <tr>
-          <th>Nhân viên</th>
+          <th>${t("employee")}</th>
   `;
 
   dates.forEach((date, index) => {
     html += `
       <th>
         ${days[index]}<br>
-        ${formatDate(date)}
+        <small>${formatDate(date)}</small>
       </th>
     `;
   });
 
   html += `</tr></thead><tbody>`;
 
-
   data.forEach((row, rowIndex) => {
-
     html += `<tr>`;
-
     html += `<td>
-      <select class="employee-select" onchange="changeEmployee(${rowIndex}, this.value)">
+      <div class="employee-cell">
+        <select class="employee-select" onchange="changeEmployee(${rowIndex}, this.value)">
     `;
 
     employees.forEach(emp => {
@@ -331,24 +616,22 @@ function renderTable() {
       `;
     });
 
-    html += `</select></td>`;
+    html += `</select>
+        <button class="btn-delete" onclick="deleteEmployee(${rowIndex})">✕</button>
+      </div>
+    </td>`;
 
+    for (let i = 0; i < 7; i++) {
+      let shift = row.shifts[i] || "";
+      let cellClass = shift ? "shift-cell" : "shift-empty";
+      let displayText = shift || t("selectHour");
 
-for(let i = 0; i < 7; i++) {
-
-  let shift = row.shifts[i] || "";
-
-  html += `
-    <td
-      ondblclick="changeShift(${rowIndex}, ${i}, '')"
-      onclick="openTimeModal(${rowIndex}, ${i})"
-    >
-
-      ${shift || "Chọn giờ"}
-
-    </td>
-  `;
-}
+      html += `
+        <td onclick="openTimeModal(${rowIndex}, ${i})">
+          <div class="${cellClass}">${displayText}</div>
+        </td>
+      `;
+    }
 
     html += `</tr>`;
   });
@@ -356,102 +639,60 @@ for(let i = 0; i < 7; i++) {
   html += `</tbody></table>`;
 
   document.getElementById("tableContainer").innerHTML = html;
-
   saveData();
 }
 
+function deleteEmployee(index) {
+  if (confirm(t("confirmDelete"))) {
+    const weekKey = getWeekKey(currentWeekOffset);
+    allWeeks[weekKey].splice(index, 1);
+    saveData();
+    renderTable();
+  }
+}
 
 function addEmployee() {
-
   const weekKey = getWeekKey(currentWeekOffset);
+  const name = prompt(t("enterName"));
 
-  const name = prompt("Nhập tên nhân viên:");
+  if (!name) return;
 
-  if(!name) return;
-
-  if(!employees.includes(name)) {
+  if (!employees.includes(name)) {
     employees.push(name);
+    localStorage.setItem("employees", JSON.stringify(employees));
   }
 
   allWeeks[weekKey].push({
     name,
-    shifts: [
-  "",
-  "",
-  "",
-  "",
-  "",
-  "",
-  ""
-]
+    shifts: ["", "", "", "", "", "", ""]
   });
 
   saveData();
   renderTable();
 }
 
-
 function changeEmployee(index, value) {
-
   const weekKey = getWeekKey(currentWeekOffset);
-
   allWeeks[weekKey][index].name = value;
-
   saveData();
 }
-
-
-function changeShift(row, day, value) {
-
-  const weekKey = getWeekKey(currentWeekOffset);
-
-  allWeeks[weekKey][row].shifts[day] = value;
-
-  saveData();
-}
-
 
 function saveData() {
   localStorage.setItem("allWeeks", JSON.stringify(allWeeks));
 }
-
 
 function nextWeek() {
   currentWeekOffset++;
   renderTable();
 }
 
-
 function prevWeek() {
   currentWeekOffset--;
   renderTable();
 }
 
-
-function createNextWeek() {
-
-  currentWeekOffset++;
-
-  const newWeekKey = getWeekKey(currentWeekOffset);
-  const prevWeekKey = getWeekKey(currentWeekOffset - 1);
-
-  if(!allWeeks[newWeekKey]) {
-
-    const previousData = allWeeks[prevWeekKey] || [];
-
-    allWeeks[newWeekKey] = JSON.parse(JSON.stringify(previousData));
-  }
-
-  saveData();
-  renderTable();
-  renderHistory();
-}
-
-
 function renderHistory() {
-
   const historyDiv = document.getElementById("historyContainer");
-
   let html = "";
 
   Object.keys(allWeeks)
@@ -459,20 +700,13 @@ function renderHistory() {
     .reverse()
     .slice(0, 12)
     .forEach(key => {
-
-      html += `
-        <button onclick="loadHistory('${key}')">
-          ${key}
-        </button>
-      `;
+      html += `<button onclick="loadHistory('${key}')">${key}</button>`;
     });
 
   historyDiv.innerHTML = html;
 }
 
-
 function loadHistory(key) {
-
   const todayKey = getWeekKey(0);
   const today = new Date(todayKey);
   const target = new Date(key);
@@ -481,126 +715,84 @@ function loadHistory(key) {
   const diffWeek = Math.round(diffTime / (1000 * 60 * 60 * 24 * 7));
 
   currentWeekOffset = diffWeek;
-
   renderTable();
 }
 
-
 async function downloadPDF() {
-
   const { jsPDF } = window.jspdf;
-
   const table = document.getElementById("shiftTable");
 
-  const canvas = await html2canvas(table);
-
+  const canvas = await html2canvas(table, { scale: 2 });
   const imgData = canvas.toDataURL("image/png");
 
   const pdf = new jsPDF("l", "mm", "a4");
-
   const imgWidth = 280;
-  const pageHeight = 210;
   const imgHeight = canvas.height * imgWidth / canvas.width;
 
   pdf.addImage(imgData, "PNG", 10, 10, imgWidth, imgHeight);
-
   pdf.save("shift_schedule.pdf");
 }
-function openPicker(row, day) {
-
-  document.getElementById(`time-${row}-${day}`).showPicker();
-}
-
-function saveTime(row, day, value) {
-
-  const weekKey = getWeekKey(currentWeekOffset);
-
-  allWeeks[weekKey][row].shifts[day] = value;
-
-  saveData();
-
-  renderTable();
-}
-let selectedRow = null;
-let selectedDay = null;
 
 function openTimeModal(row, day) {
-
   selectedRow = row;
   selectedDay = day;
 
   document.getElementById("timeModal").style.display = "flex";
 
   const weekKey = getWeekKey(currentWeekOffset);
-
   const current = allWeeks[weekKey][row].shifts[day] || "";
-
   const parts = current.split("-");
 
   document.getElementById("timeIn").value = parts[0] || "";
-
   document.getElementById("timeOut").value = parts[1] || "";
 }
 
 function closeModal() {
-
   document.getElementById("timeModal").style.display = "none";
 }
 
 function saveTimeRange() {
-
   const timeIn = document.getElementById("timeIn").value;
-
   const timeOut = document.getElementById("timeOut").value;
 
   const weekKey = getWeekKey(currentWeekOffset);
-
-  allWeeks[weekKey][selectedRow].shifts[selectedDay]
-    = `${timeIn}-${timeOut}`;
+  
+  if (timeIn && timeOut) {
+    allWeeks[weekKey][selectedRow].shifts[selectedDay] = `${timeIn}-${timeOut}`;
+  } else if (timeIn) {
+    allWeeks[weekKey][selectedRow].shifts[selectedDay] = timeIn;
+  } else {
+    allWeeks[weekKey][selectedRow].shifts[selectedDay] = "";
+  }
 
   saveData();
-
   renderTable();
-
   closeModal();
 }
+
+function clearShift() {
+  const weekKey = getWeekKey(currentWeekOffset);
+  allWeeks[weekKey][selectedRow].shifts[selectedDay] = "";
+  
+  saveData();
+  renderTable();
+  closeModal();
+}
+
+// Close modal when clicking outside
+document.getElementById("timeModal").addEventListener("click", function(e) {
+  if (e.target === this) {
+    closeModal();
+  }
+});
+
+// Handle Enter key in login
+document.getElementById("passwordInput").addEventListener("keypress", function(e) {
+  if (e.key === "Enter") {
+    login();
+  }
+});
+
 </script>
-<div id="timeModal" style="
-  display:none;
-  position:fixed;
-  top:0;
-  left:0;
-  width:100%;
-  height:100%;
-  background:rgba(0,0,0,0.5);
-  justify-content:center;
-  align-items:center;
-">
-
-  <div style="
-    background:white;
-    padding:20px;
-    border-radius:10px;
-  ">
-
-    <h3>Chọn giờ làm</h3>
-
-    <p>IN</p>
-
-    <input type="time" id="timeIn" step="1800">
-
-    <p>OUT</p>
-
-    <input type="time" id="timeOut" step="1800">
-
-    <br><br>
-
-    <button onclick="saveTimeRange()">Save</button>
-
-    <button onclick="closeModal()">Cancel</button>
-
-  </div>
-
-</div>
 </body>
 </html>
