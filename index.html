@@ -1,0 +1,521 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Shift Manager</title>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: Arial, sans-serif;
+    }
+
+    body {
+      background: #f3f4f6;
+      padding: 20px;
+    }
+
+    .container {
+      max-width: 1400px;
+      margin: auto;
+    }
+
+    .login-box,
+    .main-app {
+      background: white;
+      padding: 25px;
+      border-radius: 15px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    }
+
+    h1 {
+      margin-bottom: 20px;
+      text-align: center;
+    }
+
+    input,
+    select,
+    button {
+      padding: 10px;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+    }
+
+    button {
+      cursor: pointer;
+      border: none;
+      background: #2563eb;
+      color: white;
+      font-weight: bold;
+      transition: 0.2s;
+    }
+
+    button:hover {
+      opacity: 0.9;
+    }
+
+    .login-box {
+      max-width: 400px;
+      margin: 100px auto;
+      text-align: center;
+    }
+
+    .login-box input {
+      width: 100%;
+      margin: 15px 0;
+    }
+
+    .toolbar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      justify-content: space-between;
+      margin-bottom: 20px;
+    }
+
+    .toolbar-left,
+    .toolbar-right {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      background: white;
+      overflow-x: auto;
+    }
+
+    th,
+    td {
+      border: 1px solid #ddd;
+      padding: 10px;
+      text-align: center;
+      min-width: 120px;
+    }
+
+    th {
+      background: #2563eb;
+      color: white;
+    }
+
+    td select {
+      width: 100%;
+    }
+
+    .employee-select {
+      width: 100%;
+    }
+
+    .history {
+      margin-top: 25px;
+    }
+
+    .history button {
+      margin: 5px;
+      background: #059669;
+    }
+
+    .add-btn {
+      position: fixed;
+      right: 30px;
+      bottom: 30px;
+      width: 60px;
+      height: 60px;
+      border-radius: 50%;
+      font-size: 30px;
+      background: #10b981;
+    }
+
+    .hidden {
+      display: none;
+    }
+
+    @media (max-width: 768px) {
+      body {
+        padding: 10px;
+      }
+
+      th,
+      td {
+        min-width: 90px;
+        font-size: 12px;
+      }
+
+      .toolbar {
+        flex-direction: column;
+      }
+    }
+  </style>
+</head>
+<body>
+
+<div class="container">
+
+  <!-- LOGIN -->
+  <div class="login-box" id="loginBox">
+    <h1>Shift Manager Login</h1>
+
+    <input type="password" id="passwordInput" placeholder="Nhập mật khẩu" />
+
+    <button onclick="login()">Đăng nhập</button>
+  </div>
+
+
+  <!-- MAIN APP -->
+  <div class="main-app hidden" id="mainApp">
+
+    <h1>Quản Lý Lịch Làm Việc</h1>
+
+    <div class="toolbar">
+
+      <div class="toolbar-left">
+        <button onclick="prevWeek()">⬅ Tuần trước</button>
+        <button onclick="nextWeek()">Tuần sau ➡</button>
+      </div>
+
+      <div class="toolbar-right">
+        <button onclick="addEmployee()">+ Nhân viên</button>
+        <button onclick="downloadPDF()">⬇ PDF</button>
+      </div>
+
+    </div>
+
+
+    <div id="tableContainer"></div>
+
+
+    <div class="history">
+      <h2>Lịch sử 3 tháng</h2>
+      <div id="historyContainer"></div>
+    </div>
+
+  </div>
+
+</div>
+
+<button class="add-btn hidden" id="addWeekBtn" onclick="createNextWeek()">+</button>
+
+<script>
+
+const PASSWORD = "tencho123";
+
+const employees = [
+  "Dung",
+  "Sato",
+  "Yamada",
+  "Nguyen"
+];
+
+const shifts = [
+  "OFF",
+  "10:00-15:00",
+  "10:00-18:00",
+  "12:00-21:00",
+  "17:00-22:00",
+  "FULL"
+];
+
+let currentWeekOffset = 0;
+let allWeeks = JSON.parse(localStorage.getItem("allWeeks")) || {};
+
+
+function login() {
+  const password = document.getElementById("passwordInput").value;
+
+  if(password === PASSWORD) {
+    document.getElementById("loginBox").classList.add("hidden");
+    document.getElementById("mainApp").classList.remove("hidden");
+    document.getElementById("addWeekBtn").classList.remove("hidden");
+
+    renderTable();
+    renderHistory();
+  }
+  else {
+    alert("Sai mật khẩu");
+  }
+}
+
+
+function getMonday(date) {
+  const d = new Date(date);
+  const day = d.getDay();
+  const diff = d.getDate() - day + (day === 0 ? -6 : 1);
+
+  return new Date(d.setDate(diff));
+}
+
+
+function getWeekDates(offset = 0) {
+  const today = new Date();
+  const monday = getMonday(today);
+
+  monday.setDate(monday.getDate() + offset * 7);
+
+  let dates = [];
+
+  for(let i = 0; i < 7; i++) {
+    const d = new Date(monday);
+    d.setDate(monday.getDate() + i);
+
+    dates.push(d);
+  }
+
+  return dates;
+}
+
+
+function formatDate(date) {
+  return `${date.getFullYear()}/${date.getMonth()+1}/${date.getDate()}`;
+}
+
+
+function getWeekKey(offset = 0) {
+  return getWeekDates(offset)[0].toISOString().split("T")[0];
+}
+
+
+function renderTable() {
+
+  const dates = getWeekDates(currentWeekOffset);
+  const weekKey = getWeekKey(currentWeekOffset);
+
+  if(!allWeeks[weekKey]) {
+    allWeeks[weekKey] = [];
+  }
+
+  const data = allWeeks[weekKey];
+
+  const days = [
+    "Thứ 2",
+    "Thứ 3",
+    "Thứ 4",
+    "Thứ 5",
+    "Thứ 6",
+    "Thứ 7",
+    "Chủ nhật"
+  ];
+
+  let html = `
+    <table id="shiftTable">
+      <thead>
+        <tr>
+          <th>Nhân viên</th>
+  `;
+
+  dates.forEach((date, index) => {
+    html += `
+      <th>
+        ${days[index]}<br>
+        ${formatDate(date)}
+      </th>
+    `;
+  });
+
+  html += `</tr></thead><tbody>`;
+
+
+  data.forEach((row, rowIndex) => {
+
+    html += `<tr>`;
+
+    html += `<td>
+      <select class="employee-select" onchange="changeEmployee(${rowIndex}, this.value)">
+    `;
+
+    employees.forEach(emp => {
+      html += `
+        <option value="${emp}" ${row.name === emp ? "selected" : ""}>
+          ${emp}
+        </option>
+      `;
+    });
+
+    html += `</select></td>`;
+
+
+    for(let i = 0; i < 7; i++) {
+
+      html += `<td>
+        <select onchange="changeShift(${rowIndex}, ${i}, this.value)">
+      `;
+
+      shifts.forEach(shift => {
+        html += `
+          <option value="${shift}" ${row.shifts[i] === shift ? "selected" : ""}>
+            ${shift}
+          </option>
+        `;
+      });
+
+      html += `</select></td>`;
+    }
+
+    html += `</tr>`;
+  });
+
+  html += `</tbody></table>`;
+
+  document.getElementById("tableContainer").innerHTML = html;
+
+  saveData();
+}
+
+
+function addEmployee() {
+
+  const weekKey = getWeekKey(currentWeekOffset);
+
+  const name = prompt("Nhập tên nhân viên:");
+
+  if(!name) return;
+
+  if(!employees.includes(name)) {
+    employees.push(name);
+  }
+
+  allWeeks[weekKey].push({
+    name,
+    shifts: [
+      "OFF",
+      "OFF",
+      "OFF",
+      "OFF",
+      "OFF",
+      "OFF",
+      "OFF"
+    ]
+  });
+
+  saveData();
+  renderTable();
+}
+
+
+function changeEmployee(index, value) {
+
+  const weekKey = getWeekKey(currentWeekOffset);
+
+  allWeeks[weekKey][index].name = value;
+
+  saveData();
+}
+
+
+function changeShift(row, day, value) {
+
+  const weekKey = getWeekKey(currentWeekOffset);
+
+  allWeeks[weekKey][row].shifts[day] = value;
+
+  saveData();
+}
+
+
+function saveData() {
+  localStorage.setItem("allWeeks", JSON.stringify(allWeeks));
+}
+
+
+function nextWeek() {
+  currentWeekOffset++;
+  renderTable();
+}
+
+
+function prevWeek() {
+  currentWeekOffset--;
+  renderTable();
+}
+
+
+function createNextWeek() {
+
+  currentWeekOffset++;
+
+  const newWeekKey = getWeekKey(currentWeekOffset);
+  const prevWeekKey = getWeekKey(currentWeekOffset - 1);
+
+  if(!allWeeks[newWeekKey]) {
+
+    const previousData = allWeeks[prevWeekKey] || [];
+
+    allWeeks[newWeekKey] = JSON.parse(JSON.stringify(previousData));
+  }
+
+  saveData();
+  renderTable();
+  renderHistory();
+}
+
+
+function renderHistory() {
+
+  const historyDiv = document.getElementById("historyContainer");
+
+  let html = "";
+
+  Object.keys(allWeeks)
+    .sort()
+    .reverse()
+    .slice(0, 12)
+    .forEach(key => {
+
+      html += `
+        <button onclick="loadHistory('${key}')">
+          ${key}
+        </button>
+      `;
+    });
+
+  historyDiv.innerHTML = html;
+}
+
+
+function loadHistory(key) {
+
+  const todayKey = getWeekKey(0);
+  const today = new Date(todayKey);
+  const target = new Date(key);
+
+  const diffTime = target - today;
+  const diffWeek = Math.round(diffTime / (1000 * 60 * 60 * 24 * 7));
+
+  currentWeekOffset = diffWeek;
+
+  renderTable();
+}
+
+
+async function downloadPDF() {
+
+  const { jsPDF } = window.jspdf;
+
+  const table = document.getElementById("shiftTable");
+
+  const canvas = await html2canvas(table);
+
+  const imgData = canvas.toDataURL("image/png");
+
+  const pdf = new jsPDF("l", "mm", "a4");
+
+  const imgWidth = 280;
+  const pageHeight = 210;
+  const imgHeight = canvas.height * imgWidth / canvas.width;
+
+  pdf.addImage(imgData, "PNG", 10, 10, imgWidth, imgHeight);
+
+  pdf.save("shift_schedule.pdf");
+}
+
+</script>
+
+</body>
+</html>
