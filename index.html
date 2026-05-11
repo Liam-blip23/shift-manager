@@ -214,14 +214,7 @@ const employees = [
   "Nguyen"
 ];
 
-const shifts = [
-  "OFF",
-  "10:00-15:00",
-  "10:00-18:00",
-  "12:00-21:00",
-  "17:00-22:00",
-  "FULL"
-];
+
 
 let currentWeekOffset = 0;
 let allWeeks = JSON.parse(localStorage.getItem("allWeeks")) || {};
@@ -341,22 +334,28 @@ function renderTable() {
     html += `</select></td>`;
 
 
-    for(let i = 0; i < 7; i++) {
+for(let i = 0; i < 7; i++) {
 
-      html += `<td>
-        <select onchange="changeShift(${rowIndex}, ${i}, this.value)">
-      `;
+  html += `
+    <td>
 
-      shifts.forEach(shift => {
-        html += `
-          <option value="${shift}" ${row.shifts[i] === shift ? "selected" : ""}>
-            ${shift}
-          </option>
-        `;
-      });
+      <div onclick="openPicker(${rowIndex}, ${i})">
 
-      html += `</select></td>`;
-    }
+        ${row.shifts[i] || "Chọn giờ"}
+
+      </div>
+
+      <input
+        type="time"
+        step="1800"
+        id="time-${rowIndex}-${i}"
+        style="opacity:0; position:absolute;"
+        onchange="saveTime(${rowIndex}, ${i}, this.value)"
+      />
+
+    </td>
+  `;
+}
 
     html += `</tr>`;
   });
@@ -384,14 +383,14 @@ function addEmployee() {
   allWeeks[weekKey].push({
     name,
     shifts: [
-      "OFF",
-      "OFF",
-      "OFF",
-      "OFF",
-      "OFF",
-      "OFF",
-      "OFF"
-    ]
+  "",
+  "",
+  "",
+  "",
+  "",
+  "",
+  ""
+]
   });
 
   saveData();
@@ -514,7 +513,21 @@ async function downloadPDF() {
 
   pdf.save("shift_schedule.pdf");
 }
+function openPicker(row, day) {
 
+  document.getElementById(`time-${row}-${day}`).showPicker();
+}
+
+function saveTime(row, day, value) {
+
+  const weekKey = getWeekKey(currentWeekOffset);
+
+  allWeeks[weekKey][row].shifts[day] = value;
+
+  saveData();
+
+  renderTable();
+}
 </script>
 
 </body>
