@@ -5,8 +5,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
   <title>Shift Manager</title>
 
-  <script src="[cdnjs.cloudflare.com](https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js)"></script>
-  <script src="[cdnjs.cloudflare.com](https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js)"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 
   <style>
     * {
@@ -402,17 +403,40 @@
     <h1 id="mainTitle">📅 Quản Lý Lịch Làm Việc</h1>
 
     <div class="toolbar">
-      <div class="toolbar-left">
-        <button class="btn-nav" onclick="prevWeek()">⬅ <span data-lang="prevWeek">Tuần trước</span></button>
-        <button class="btn-nav" onclick="nextWeek()"><span data-lang="nextWeek">Tuần sau</span> ➡</button>
-      </div>
 
-      <div class="toolbar-right">
-        <button class="btn-lang" onclick="toggleLanguage()">🌐 <span id="langBtn">日本語</span></button>
-        <button class="btn-add" onclick="addEmployee()">+ <span data-lang="employee">Nhân viên</span></button>
-        <button class="btn-pdf" onclick="downloadPDF()">⬇ PDF</button>
-      </div>
-    </div>
+  <div class="toolbar-left">
+
+    <button class="btn-nav" onclick="prevWeek()">
+      ⬅ <span data-lang="prevWeek">Tuần trước</span>
+    </button>
+
+    <button class="btn-nav" onclick="nextWeek()">
+      <span data-lang="nextWeek">Tuần sau</span> ➡
+    </button>
+
+    <button class="btn-add" onclick="copyPreviousWeek()">
+      📋 Copy tuần trước
+    </button>
+
+  </div>
+
+  <div class="toolbar-right">
+
+    <button class="btn-lang" onclick="toggleLanguage()">
+      🌐 <span id="langBtn">日本語</span>
+    </button>
+
+    <button class="btn-add" onclick="addEmployee()">
+      + <span data-lang="employee">Nhân viên</span>
+    </button>
+
+    <button class="btn-pdf" onclick="downloadPDF()">
+      ⬇ PDF
+    </button>
+
+  </div>
+
+</div>
 
     <div class="table-wrapper">
       <div id="tableContainer"></div>
@@ -450,7 +474,8 @@
 
 const PASSWORD = "tencho123";
 
-let employees = JSON.parse(localStorage.getItem("employees")) || [
+let employees =
+JSON.parse(localStorage.getItem("employees")) || [
   "Dung",
   "Sato",
   "Yamada",
@@ -458,177 +483,234 @@ let employees = JSON.parse(localStorage.getItem("employees")) || [
 ];
 
 let currentWeekOffset = 0;
-let allWeeks = JSON.parse(localStorage.getItem("allWeeks")) || {};
+
+let allWeeks =
+JSON.parse(localStorage.getItem("allWeeks")) || {};
+
 let selectedRow = null;
 let selectedDay = null;
-let currentLang = localStorage.getItem("lang") || "vi";
 
-// Language translations
+let currentLang =
+localStorage.getItem("lang") || "vi";
+
 const translations = {
-  vi: {
-    mainTitle: "📅 Quản Lý Lịch Làm Việc",
-    prevWeek: "Tuần trước",
-    nextWeek: "Tuần sau",
-    employee: "Nhân viên",
-    history: "📜 Lịch sử 3 tháng",
-    selectTime: "⏰ Chọn giờ làm",
-    timeIn: "Giờ vào (IN)",
-    timeOut: "Giờ ra (OUT)",
-    cancel: "Hủy",
-    clear: "Xóa",
-    save: "Lưu",
-    delete: "Xóa",
-    selectHour: "Chọn giờ",
-    enterName: "Nhập tên nhân viên:",
-    confirmDelete: "Bạn có chắc muốn xóa nhân viên này?",
-    days: ["Thứ 2", "Thứ 3", "Thứ 4", "Thứ 5", "Thứ 6", "Thứ 7", "CN"],
-    langBtn: "日本語"
+
+  vi:{
+    title:"📅 Quản Lý Lịch Làm Việc",
+    history:"📜 Lịch sử 3 tháng",
+    days:[
+      "T2","T3","T4","T5","T6","T7","CN"
+    ]
   },
-  ja: {
-    mainTitle: "📅 シフト管理",
-    prevWeek: "前週",
-    nextWeek: "次週",
-    employee: "従業員",
-    history: "📜 過去3ヶ月",
-    selectTime: "⏰ 勤務時間選択",
-    timeIn: "出勤時間",
-    timeOut: "退勤時間",
-    cancel: "キャンセル",
-    clear: "クリア",
-    save: "保存",
-    delete: "削除",
-    selectHour: "時間選択",
-    enterName: "従業員名を入力:",
-    confirmDelete: "この従業員を削除しますか？",
-    days: ["月", "火", "水", "木", "金", "土", "日"],
-    langBtn: "Tiếng Việt"
+
+  ja:{
+    title:"📅 シフト管理",
+    history:"📜 過去3ヶ月",
+    days:[
+      "月","火","水","木","金","土","日"
+    ]
   }
 };
 
-function t(key) {
-  return translations[currentLang][key] || key;
+function t(key){
+  return translations[currentLang][key];
 }
 
-function toggleLanguage() {
-  currentLang = currentLang === "vi" ? "ja" : "vi";
+function toggleLanguage(){
+
+  currentLang =
+  currentLang === "vi" ? "ja" : "vi";
+
   localStorage.setItem("lang", currentLang);
+
   updateLanguage();
+
   renderTable();
 }
 
-function updateLanguage() {
-  document.getElementById("mainTitle").textContent = t("mainTitle");
-  document.getElementById("langBtn").textContent = t("langBtn");
-  
-  document.querySelectorAll("[data-lang]").forEach(el => {
-    const key = el.getAttribute("data-lang");
-    if (translations[currentLang][key]) {
-      el.textContent = translations[currentLang][key];
-    }
-  });
+function updateLanguage(){
+
+  document.getElementById("mainTitle")
+  .textContent = t("title");
+
+  document.getElementById("historyTitle")
+  .textContent = t("history");
+
+  document.getElementById("langBtn")
+  .textContent =
+  currentLang === "vi"
+  ? "日本語"
+  : "Tiếng Việt";
 }
 
-function login() {
-  const password = document.getElementById("passwordInput").value;
+function login(){
 
-  if (password === PASSWORD) {
-    document.getElementById("loginBox").classList.add("hidden");
-    document.getElementById("mainApp").classList.remove("hidden");
-    
+  const password =
+  document.getElementById("passwordInput").value;
+
+  if(password === PASSWORD){
+
+    document.getElementById("loginBox")
+    .classList.add("hidden");
+
+    document.getElementById("mainApp")
+    .classList.remove("hidden");
+
     updateLanguage();
+
     renderTable();
+
     renderHistory();
-  } else {
-    alert("Sai mật khẩu / パスワードが違います");
+
+  }else{
+
+    alert("Sai mật khẩu");
   }
 }
 
-function getMonday(date) {
+function getMonday(date){
+
   const d = new Date(date);
+
   const day = d.getDay();
-  const diff = d.getDate() - day + (day === 0 ? -6 : 1);
+
+  const diff =
+  d.getDate() - day + (day === 0 ? -6 : 1);
+
   return new Date(d.setDate(diff));
 }
 
-function getWeekDates(offset = 0) {
+function getWeekDates(offset=0){
+
   const today = new Date();
+
   const monday = getMonday(today);
-  monday.setDate(monday.getDate() + offset * 7);
+
+  monday.setDate(
+    monday.getDate() + offset * 7
+  );
 
   let dates = [];
-  for (let i = 0; i < 7; i++) {
+
+  for(let i=0;i<7;i++){
+
     const d = new Date(monday);
-    d.setDate(monday.getDate() + i);
+
+    d.setDate(monday.getDate()+i);
+
     dates.push(d);
   }
+
   return dates;
 }
 
-function formatDate(date) {
-  return `${date.getMonth() + 1}/${date.getDate()}`;
+function formatDate(date){
+
+  return `${date.getMonth()+1}/${date.getDate()}`;
 }
 
-function getWeekKey(offset = 0) {
-  return getWeekDates(offset)[0].toISOString().split("T")[0];
+function getWeekKey(offset=0){
+
+  return getWeekDates(offset)[0]
+  .toISOString()
+  .split("T")[0];
 }
 
-function renderTable() {
-  const dates = getWeekDates(currentWeekOffset);
-  const weekKey = getWeekKey(currentWeekOffset);
+function renderTable(){
 
-  if (!allWeeks[weekKey]) {
+  const dates =
+  getWeekDates(currentWeekOffset);
+
+  const weekKey =
+  getWeekKey(currentWeekOffset);
+
+  if(!allWeeks[weekKey]){
+
     allWeeks[weekKey] = [];
   }
 
   const data = allWeeks[weekKey];
-  const days = t("days");
 
   let html = `
     <table id="shiftTable">
-      <thead>
-        <tr>
-          <th>${t("employee")}</th>
+    <thead>
+    <tr>
+    <th>Staff</th>
   `;
 
-  dates.forEach((date, index) => {
+  dates.forEach((date,index)=>{
+
     html += `
       <th>
-        ${days[index]}<br>
-        <small>${formatDate(date)}</small>
+      ${t("days")[index]}<br>
+      <small>${formatDate(date)}</small>
       </th>
     `;
   });
 
-  html += `</tr></thead><tbody>`;
+  html += `
+    </tr>
+    </thead>
+    <tbody>
+  `;
 
-  data.forEach((row, rowIndex) => {
+  data.forEach((row,rowIndex)=>{
+
     html += `<tr>`;
-    html += `<td>
+
+    html += `
+      <td>
+
       <div class="employee-cell">
-        <select class="employee-select" onchange="changeEmployee(${rowIndex}, this.value)">
+
+      <select
+      class="employee-select"
+      onchange="changeEmployee(${rowIndex},this.value)"
+      >
     `;
 
-    employees.forEach(emp => {
+    employees.forEach(emp=>{
+
       html += `
-        <option value="${emp}" ${row.name === emp ? "selected" : ""}>
-          ${emp}
+        <option
+        value="${emp}"
+        ${row.name===emp?"selected":""}
+        >
+        ${emp}
         </option>
       `;
     });
 
-    html += `</select>
-        <button class="btn-delete" onclick="deleteEmployee(${rowIndex})">✕</button>
-      </div>
-    </td>`;
+    html += `
+      </select>
 
-    for (let i = 0; i < 7; i++) {
-      let shift = row.shifts[i] || "";
-      let cellClass = shift ? "shift-cell" : "shift-empty";
-      let displayText = shift || t("selectHour");
+      <button
+      class="btn-delete"
+      onclick="deleteEmployee(${rowIndex})"
+      >
+      ✕
+      </button>
+
+      </div>
+
+      </td>
+    `;
+
+    for(let i=0;i<7;i++){
+
+      let shift =
+      row.shifts[i] || "";
+
+      let cellClass =
+      shift ? "shift-cell" : "shift-empty";
 
       html += `
-        <td onclick="openTimeModal(${rowIndex}, ${i})">
-          <div class="${cellClass}">${displayText}</div>
+        <td onclick="openTimeModal(${rowIndex},${i})">
+
+        <div class="${cellClass}">
+        ${shift || "Chọn giờ"}
+        </div>
+
         </td>
       `;
     }
@@ -636,162 +718,316 @@ function renderTable() {
     html += `</tr>`;
   });
 
-  html += `</tbody></table>`;
+  html += `
+    </tbody>
+    </table>
+  `;
 
-  document.getElementById("tableContainer").innerHTML = html;
+  document.getElementById("tableContainer")
+  .innerHTML = html;
+
   saveData();
 }
 
-function deleteEmployee(index) {
-  if (confirm(t("confirmDelete"))) {
-    const weekKey = getWeekKey(currentWeekOffset);
-    allWeeks[weekKey].splice(index, 1);
+function addEmployee(){
+
+  const weekKey =
+  getWeekKey(currentWeekOffset);
+
+  const name =
+  prompt("Tên nhân viên");
+
+  if(!name) return;
+
+  if(!employees.includes(name)){
+
+    employees.push(name);
+
+    localStorage.setItem(
+      "employees",
+      JSON.stringify(employees)
+    );
+  }
+
+  allWeeks[weekKey].push({
+
+    name,
+
+    shifts:[
+      "","","","","","",""
+    ]
+  });
+
+  saveData();
+
+  renderTable();
+}
+
+function deleteEmployee(index){
+
+  if(confirm("Delete?")){
+
+    const weekKey =
+    getWeekKey(currentWeekOffset);
+
+    allWeeks[weekKey].splice(index,1);
+
     saveData();
+
     renderTable();
   }
 }
 
-function addEmployee() {
-  const weekKey = getWeekKey(currentWeekOffset);
-  const name = prompt(t("enterName"));
+function changeEmployee(index,value){
 
-  if (!name) return;
+  const weekKey =
+  getWeekKey(currentWeekOffset);
 
-  if (!employees.includes(name)) {
-    employees.push(name);
-    localStorage.setItem("employees", JSON.stringify(employees));
+  allWeeks[weekKey][index].name = value;
+
+  saveData();
+}
+
+function saveData(){
+
+  localStorage.setItem(
+    "allWeeks",
+    JSON.stringify(allWeeks)
+  );
+}
+function copyPreviousWeek(){
+
+  const currentKey =
+    getWeekKey(currentWeekOffset);
+
+  const prevKey =
+    getWeekKey(currentWeekOffset - 1);
+
+  if(!allWeeks[prevKey]){
+
+    alert("Không có dữ liệu tuần trước");
+    return;
   }
 
-  allWeeks[weekKey].push({
-    name,
-    shifts: ["", "", "", "", "", "", ""]
-  });
+  allWeeks[currentKey] =
+    JSON.parse(
+      JSON.stringify(allWeeks[prevKey])
+    );
 
   saveData();
+
   renderTable();
-}
 
-function changeEmployee(index, value) {
-  const weekKey = getWeekKey(currentWeekOffset);
-  allWeeks[weekKey][index].name = value;
-  saveData();
+  alert("Đã copy tuần trước");
 }
+function nextWeek(){
 
-function saveData() {
-  localStorage.setItem("allWeeks", JSON.stringify(allWeeks));
-}
-
-function nextWeek() {
   currentWeekOffset++;
+
   renderTable();
 }
 
-function prevWeek() {
+function prevWeek(){
+
   currentWeekOffset--;
+
   renderTable();
 }
 
-function renderHistory() {
-  const historyDiv = document.getElementById("historyContainer");
+function renderHistory(){
+
+  const historyDiv =
+  document.getElementById("historyContainer");
+
   let html = "";
 
   Object.keys(allWeeks)
-    .sort()
-    .reverse()
-    .slice(0, 12)
-    .forEach(key => {
-      html += `<button onclick="loadHistory('${key}')">${key}</button>`;
-    });
+  .sort()
+  .reverse()
+  .slice(0,12)
+  .forEach(key=>{
+
+    html += `
+      <button onclick="loadHistory('${key}')">
+      ${key}
+      </button>
+    `;
+  });
 
   historyDiv.innerHTML = html;
 }
 
-function loadHistory(key) {
+function loadHistory(key){
+
   const todayKey = getWeekKey(0);
+
   const today = new Date(todayKey);
+
   const target = new Date(key);
 
   const diffTime = target - today;
-  const diffWeek = Math.round(diffTime / (1000 * 60 * 60 * 24 * 7));
+
+  const diffWeek =
+  Math.round(
+    diffTime /
+    (1000*60*60*24*7)
+  );
 
   currentWeekOffset = diffWeek;
+
   renderTable();
 }
 
-async function downloadPDF() {
-  const { jsPDF } = window.jspdf;
-  const table = document.getElementById("shiftTable");
+async function downloadPDF(){
 
-  const canvas = await html2canvas(table, { scale: 2 });
-  const imgData = canvas.toDataURL("image/png");
+  try{
 
-  const pdf = new jsPDF("l", "mm", "a4");
-  const imgWidth = 280;
-  const imgHeight = canvas.height * imgWidth / canvas.width;
+    const { jsPDF } = window.jspdf;
 
-  pdf.addImage(imgData, "PNG", 10, 10, imgWidth, imgHeight);
-  pdf.save("shift_schedule.pdf");
+    const table =
+    document.getElementById("shiftTable");
+
+    const canvas =
+    await html2canvas(table,{
+      scale:2,
+      useCORS:true
+    });
+
+    const imgData =
+    canvas.toDataURL("image/png");
+
+    const pdf =
+    new jsPDF("l","mm","a4");
+
+    const imgWidth = 280;
+
+    const imgHeight =
+    canvas.height * imgWidth /
+    canvas.width;
+
+    pdf.addImage(
+      imgData,
+      "PNG",
+      10,
+      10,
+      imgWidth,
+      imgHeight
+    );
+
+    pdf.save("shift_schedule.pdf");
+
+  }catch(error){
+
+    console.error(error);
+
+    alert("PDF Error");
+  }
 }
 
-function openTimeModal(row, day) {
+function openTimeModal(row,day){
+
   selectedRow = row;
   selectedDay = day;
 
-  document.getElementById("timeModal").style.display = "flex";
+  document.getElementById("timeModal")
+  .style.display = "flex";
 
-  const weekKey = getWeekKey(currentWeekOffset);
-  const current = allWeeks[weekKey][row].shifts[day] || "";
+  const weekKey =
+  getWeekKey(currentWeekOffset);
+
+  const current =
+  allWeeks[weekKey][row].shifts[day] || "";
+
   const parts = current.split("-");
 
-  document.getElementById("timeIn").value = parts[0] || "";
-  document.getElementById("timeOut").value = parts[1] || "";
+  document.getElementById("timeIn")
+  .value = parts[0] || "";
+
+  document.getElementById("timeOut")
+  .value = parts[1] || "";
 }
 
-function closeModal() {
-  document.getElementById("timeModal").style.display = "none";
+function closeModal(){
+
+  document.getElementById("timeModal")
+  .style.display = "none";
 }
 
-function saveTimeRange() {
-  const timeIn = document.getElementById("timeIn").value;
-  const timeOut = document.getElementById("timeOut").value;
+function saveTimeRange(){
 
-  const weekKey = getWeekKey(currentWeekOffset);
-  
-  if (timeIn && timeOut) {
-    allWeeks[weekKey][selectedRow].shifts[selectedDay] = `${timeIn}-${timeOut}`;
-  } else if (timeIn) {
-    allWeeks[weekKey][selectedRow].shifts[selectedDay] = timeIn;
-  } else {
-    allWeeks[weekKey][selectedRow].shifts[selectedDay] = "";
+  const timeIn =
+  document.getElementById("timeIn").value;
+
+  const timeOut =
+  document.getElementById("timeOut").value;
+
+  const weekKey =
+  getWeekKey(currentWeekOffset);
+
+  if(timeIn && timeOut){
+
+    allWeeks[weekKey][selectedRow]
+    .shifts[selectedDay]
+    = `${timeIn}-${timeOut}`;
+
+  }else if(timeIn){
+
+    allWeeks[weekKey][selectedRow]
+    .shifts[selectedDay]
+    = timeIn;
+
+  }else{
+
+    allWeeks[weekKey][selectedRow]
+    .shifts[selectedDay]
+    = "";
   }
 
   saveData();
+
   renderTable();
+
   closeModal();
 }
 
-function clearShift() {
-  const weekKey = getWeekKey(currentWeekOffset);
-  allWeeks[weekKey][selectedRow].shifts[selectedDay] = "";
-  
+function clearShift(){
+
+  const weekKey =
+  getWeekKey(currentWeekOffset);
+
+  allWeeks[weekKey][selectedRow]
+  .shifts[selectedDay] = "";
+
   saveData();
+
   renderTable();
+
   closeModal();
 }
 
-// Close modal when clicking outside
-document.getElementById("timeModal").addEventListener("click", function(e) {
-  if (e.target === this) {
-    closeModal();
-  }
-});
+window.onload = function(){
 
-// Handle Enter key in login
-document.getElementById("passwordInput").addEventListener("keypress", function(e) {
-  if (e.key === "Enter") {
-    login();
-  }
-});
+  const modal =
+  document.getElementById("timeModal");
+
+  modal.addEventListener("click",function(e){
+
+    if(e.target === this){
+
+      closeModal();
+    }
+  });
+
+  document
+  .getElementById("passwordInput")
+  .addEventListener("keypress",function(e){
+
+    if(e.key === "Enter"){
+
+      login();
+    }
+  });
+};
 
 </script>
 </body>
